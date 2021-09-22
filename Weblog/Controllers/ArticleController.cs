@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Weblog.Domain;
+using System.Threading.Tasks;
 using Weblog.Domain.Models;
-using Weblog.Requests;
 using Weblog.ViewModels;
+using Weblog.Requests;
+using Weblog.Services;
+using Weblog.Domain;
+using System.Linq;
+using System;
 
 namespace Weblog.Controllers
 {
@@ -14,9 +17,13 @@ namespace Weblog.Controllers
     public class ArticleController : Controller
     {
         private readonly DatabaseContext _db;
-        public ArticleController()
+        private readonly FileHandlerService _fs;
+        private readonly IHostingEnvironment _env;
+        public ArticleController(IHostingEnvironment env)
         {
             _db = new DatabaseContext();
+            this._fs = new FileHandlerService(env);
+            _env = env;
         }
 
         // GET: ArticleController
@@ -26,7 +33,6 @@ namespace Weblog.Controllers
             try
             {
                 var article = _db.Articles.AsNoTracking();
-
                 if (request is null)
                 {
                     throw new Exception("request is null");
@@ -47,13 +53,38 @@ namespace Weblog.Controllers
                         break;
                     default:
                         break;
-                }  
-                var result = article.Skip((request.Page - 1) * request.PerPage).Take(request.PerPage)
-                    .Select(x => new ArticleVm(x.Title, x.Body, x.ShortDescription, x.Image, x.CreatedAt,
+                }
+
+                var totalArticleCount = article.Count(x=>x.UserId == request.UserId);
+
+                var result = article.Where(x=>x.UserId == request.UserId)
+                    .Skip((request.Page - 1) * request.PerPage).Take(request.PerPage)
+                    .Select(x => new ArticleVm(x.Id, x.Title, x.Body, x.ShortDescription, x.Image, x.CreatedAt,
                         x.UpdatedAt, x.Status, x.CategoryId)).ToList();
 
+                return Ok(new { data = result, lenght = totalArticleCount });
 
-                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+        [HttpGet]
+        [Route(Routing.Category.View.Get.List)]
+        public ActionResult IndexView(int count)
+        {
+            try
+            {
+                var article = _db.Articles.AsNoTracking();
+                
+                var totalArticleCount = article.Count();
+
+                var result = article.Take(count)
+                    .Select(x => new ArticleVm(x.Id, x.Title, x.Body, x.ShortDescription, x.Image, x.CreatedAt,
+                        x.UpdatedAt, x.Status, x.CategoryId)).ToList();
+
+                return Ok(new { data = result, lenght = totalArticleCount });
 
             }
             catch (Exception e)
@@ -74,11 +105,11 @@ namespace Weblog.Controllers
                 if (request is null)
                     throw new Exception("request is null");
                 if (articles.Any(x => x.Title == request.Title))
-                    throw new Exception(" title is duplicated");
-
+                    throw new Exception(" مقاله ای با این عنوان وجود دارد");
                 var newArticle = new Article(request.Title, request.Body, request.ShortDescription, request.Image, request.CreatedAt, request.UpdatedAt, request.Status, request.UserId, request.CategoryId);
+
                 _db.Articles.Add(newArticle);
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
                 return Ok();
             }
             catch (Exception e)
@@ -87,17 +118,38 @@ namespace Weblog.Controllers
             }
         }
 
+        [HttpPost]
+        [Route(Routing.Article.Post.UploadImage)]
+        public async Task<IActionResult> UploadImage([FromForm] UploadImageRequest request)
+        {
+            try
+            {
+                var result = await _fs.Store(request.Image);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
 
         // GET: ArticleController/Details/5
         [HttpGet]
         [Route(Routing.Article.Get.Detail)]
-        public ActionResult Details(int id)
+        public ActionResult Details(string id)
         {
-            var articles = _db.Articles.AsNoTracking();
+            var articles = _db.Articles;
             try
             {
-                var article = articles.FirstOrDefault(x => x.Id == id) ?? throw new ArgumentNullException("article not found");
-                return Ok(article);
+                var article = articles.Find(Int32.Parse(id));
+                if (article == null)
+                {
+                    throw new Exception("کاربر یافت نشد");
+                }
+
+                var articleVm = new ArticleVm(Int32.Parse(id), article.Title, article.Body, article.ShortDescription, article.Image,
+                    article.CreatedAt, article.UpdatedAt, article.Status, article.CategoryId);
+                return Ok(articleVm);
 
             }
             catch (Exception e)
@@ -109,17 +161,18 @@ namespace Weblog.Controllers
         // POST: ArticleController/Edit/5
         [HttpPost]
         [Route(Routing.Article.Post.Edit)]
-        public ActionResult Edit([FromBody] ArticleVm request, int id)
+        public async Task<ActionResult> Edit([FromBody] ArticleVm request )
         {
-            var articles = _db.Articles.AsNoTracking();
+            var articles = _db.Articles;
 
             try
             {
-                var article = articles.FirstOrDefault(x => x.Id == id) ?? throw new ArgumentNullException("article not found");
+                var article = articles.FirstOrDefault(x => x.Id == request.Id) ?? throw new ArgumentNullException("article not found");
 
-                article.Edit(request.Title, request.Body, request.ShortDescription, request.Image, request.CreatedAt, request.UpdatedAt, request.Status, request.CategoryId);
+                article.Edit(request.Title, request.Body, request.ShortDescription, request.Image, request.CreatedAt,
+                    DateTime.Now.ToString("MM/dd/yyyy hh:mm tt"), request.Status, request.CategoryId);
 
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
 
                 return Ok();
             }

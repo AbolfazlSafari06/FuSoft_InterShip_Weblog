@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,6 @@ using Newtonsoft.Json;
 using Weblog.Domain;
 using Weblog.Domain.Models;
 using Weblog.Requests;
-using Weblog.Response.User;
 using Weblog.ViewModels;
 
 namespace Weblog.Controllers
@@ -21,17 +21,28 @@ namespace Weblog.Controllers
             this._db = new DatabaseContext();
         }
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(CategoryListRequest request)
         {
             try
             {
-                var categories = _db.Categories
-                    .Where(c => c.ParentId == null)
-                    .OrderBy(c => c.Order)
+                var categories = _db.Categories.AsNoTracking();
+
+                var totalArticleCount = categories.Count();
+
+
+                if (request is null)
+                {
+                    throw new Exception("request is null");
+                }
+
+                var result = categories
+                    .Skip((request.Page - 1) * request.PerPage).Take(request.PerPage)
+                    .Select(x => new CategoryVm(x.Id, x.Title, x.Order, x.ParentId, x.Children.Count))
                     .ToList();
 
-                return Ok(categories);
-                //return Ok(categories.ToList());
+                //var result = returnjson(categories.FirstOrDefault(x => x.Id == 1005));
+
+                return Ok(new { data = result, lenght = totalArticleCount });
             }
             catch (Exception e)
             {
@@ -163,7 +174,7 @@ namespace Weblog.Controllers
                 }
                 _db.Categories.Remove(category);
                 _db.SaveChanges();
-                return Ok("user is deleted");
+                return Ok("دسته بندی با موفقیت پاک شد");
             }
             catch (Exception e)
             {

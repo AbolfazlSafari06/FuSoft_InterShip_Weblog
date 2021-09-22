@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Weblog.Domain.Models
 {
@@ -21,9 +23,9 @@ namespace Weblog.Domain.Models
         public string ShortDescription { get; set; }
         public string Image { get; set; }
         [Required]
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public string Status { get; set; }
+        public string CreatedAt { get; set; }
+        public string UpdatedAt { get; set; }
+        public string Status { get; set; } 
         [Required]
         public int UserId { get; set; }
 
@@ -31,16 +33,18 @@ namespace Weblog.Domain.Models
         [ForeignKey("UserId")]
         public virtual User User { get; set; }
 
-        [Required]
-        public int CategoryId { get; set; }
-        [Required]
+        
+        public int? CategoryId { get; set; } 
         [ForeignKey("CategoryId")]
-        public virtual Category Category { get; set; }
-
+        public virtual Category? Category { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
 
-        public Article(string title, string body, string shortDescription, string image, DateTime createdAt, DateTime updatedAt, string status, int userId, int categoryId)
+        public Article(string title, string body, string shortDescription, string image, string createdAt, string updatedAt, string status, int userId, int? categoryId)
         {
+            if (string.IsNullOrEmpty(title))
+            {
+                throw new Exception("عنوان مقاله را وارد کنید");
+            }
             Title = title;
             Body = body;
             ShortDescription = shortDescription;
@@ -49,19 +53,23 @@ namespace Weblog.Domain.Models
             UpdatedAt = updatedAt;
             Status = status;
             UserId = userId;
-            CategoryId = categoryId;
-        }
+            CategoryId = categoryId; 
+        } 
 
-        public void Edit(string title, string body, string shortDescription, string image, DateTime createdAt,
-            DateTime updatedAt, string status, int categoryId)
+        public void Edit(string title, string body, string shortDescription, string image, string createdAt,
+            string updatedAt, string status, int? categoryId)
         {
+            if (string.IsNullOrEmpty(title))
+            {
+                throw new Exception("عنوان مقاله را وارد کنید");
+            }
             Title = title;
             Body = body;
             ShortDescription = shortDescription;
             Image = image;
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
-            Status = status; 
+            Status = status;
             CategoryId = categoryId;
         }
     }

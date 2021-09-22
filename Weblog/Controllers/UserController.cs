@@ -21,9 +21,9 @@ namespace Weblog.Controllers
         [HttpGet]
         [Route(Routing.Users.Get.Users)]
         public IActionResult Index(UserListRequest request)
-        { 
+        {
             try
-            { 
+            {
                 var users = _db.Users.AsNoTracking();
 
                 if (request.Query != null)
@@ -57,12 +57,22 @@ namespace Weblog.Controllers
         [Route(Routing.Users.Get.User)]
         public IActionResult Detail(string id)
         {
-            var user = this._db.Users.Find(Int32.Parse(id));
-            if (user == null)
+            try
             {
-                return BadRequest(new Exception("user Not Found"));
+                var user = this._db.Users.Find(Int32.Parse(id));
+                if (user == null)
+                {
+                    return BadRequest(new Exception("کاربر یافت نشد"));
+                }
+
+                var result = new UserVm(user.Id, user.Name, user.Email, user.IsAdmin);
+                return Ok(result);
             }
-            return Ok(user);
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
         }
         [HttpPost]
         [Route(Routing.Users.Post.Create)]
@@ -94,7 +104,7 @@ namespace Weblog.Controllers
             {
                 return NotFound("user Not Found");
             }
-            user.UpdateByAdmin(request.Name, request.Email, request.Password ,request.IsAdmin);
+            user.UpdateByAdmin(request.Name, request.Email, request.Password, request.IsAdmin);
             _db.SaveChanges();
             return Ok(new UserVm(user.Id, user.Name, user.Email, user.IsAdmin));
         }
@@ -118,15 +128,24 @@ namespace Weblog.Controllers
         [Route(Routing.Users.Post.Dalete)]
         public IActionResult Delete(int id)
         {
-            var user = _db.Users.FirstOrDefault(x => x.Id == id);
-            if (user == null)
+            try
             {
-                return NotFound();
-            }
-            _db.Users.Remove(user);
-            _db.SaveChanges();
+                var user = _db.Users.FirstOrDefault(x => x.Id == id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                user.Comments.Clear();
+                _db.Users.Remove(user);
+                _db.SaveChanges();
 
-            return Ok("user is deleted");
+                return Ok("user is deleted");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(e);
+            }
         }
     }
 }

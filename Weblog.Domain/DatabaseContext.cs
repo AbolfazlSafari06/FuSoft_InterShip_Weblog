@@ -15,8 +15,7 @@ namespace Weblog.Domain
             modelBuilder.Entity<Comment>()
                 .HasOne<User>(c => c.User)
                 .WithMany(u => u.Comments)
-                .HasForeignKey(c => c.UserId)
-                .IsRequired()
+                .HasForeignKey(c => c.UserId) 
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Category>() 

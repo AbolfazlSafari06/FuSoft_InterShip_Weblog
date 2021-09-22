@@ -10,8 +10,8 @@ namespace Weblog.Requests
             Body = body;
             ShortDescription = shortDescription;
             Image = image;
-            CreatedAt = DateTime.Now;
-            UpdatedAt = DateTime.Now;
+            CreatedAt = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
+            UpdatedAt = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
             Status = status;
             UserId = userId;
             CategoryId = categoryId;
@@ -23,8 +23,8 @@ namespace Weblog.Requests
         public int UserId { get; set; }
         public string ShortDescription { get; set; }
         public string? Image { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public string CreatedAt { get; set; }
+        public string UpdatedAt { get; set; }
         public string? Status { get; set; }
 
 

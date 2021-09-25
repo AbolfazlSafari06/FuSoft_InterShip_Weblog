@@ -60,7 +60,7 @@ namespace Weblog.Controllers
                 var result = article.Where(x=>x.UserId == request.UserId)
                     .Skip((request.Page - 1) * request.PerPage).Take(request.PerPage)
                     .Select(x => new ArticleVm(x.Id, x.Title, x.Body, x.ShortDescription, x.Image, x.CreatedAt,
-                        x.UpdatedAt, x.Status, x.CategoryId)).ToList();
+                        x.UpdatedAt, x.Status, x.CategoryId,x.UserId)).ToList();
 
                 return Ok(new { data = result, lenght = totalArticleCount });
 
@@ -71,7 +71,7 @@ namespace Weblog.Controllers
             }
         }
         [HttpGet]
-        [Route(Routing.Category.View.Get.List)]
+        [Route(Routing.Article.View.Get.List)]
         public ActionResult IndexView(int count)
         {
             try
@@ -82,7 +82,7 @@ namespace Weblog.Controllers
 
                 var result = article.Take(count)
                     .Select(x => new ArticleVm(x.Id, x.Title, x.Body, x.ShortDescription, x.Image, x.CreatedAt,
-                        x.UpdatedAt, x.Status, x.CategoryId)).ToList();
+                        x.UpdatedAt, x.Status, x.CategoryId,x.UserId)).ToList();
 
                 return Ok(new { data = result, lenght = totalArticleCount });
 
@@ -148,7 +148,7 @@ namespace Weblog.Controllers
                 }
 
                 var articleVm = new ArticleVm(Int32.Parse(id), article.Title, article.Body, article.ShortDescription, article.Image,
-                    article.CreatedAt, article.UpdatedAt, article.Status, article.CategoryId);
+                    article.CreatedAt, article.UpdatedAt, article.Status, article.CategoryId,article.UserId);
                 return Ok(articleVm);
 
             }
@@ -193,7 +193,7 @@ namespace Weblog.Controllers
                 var article = articles.FirstOrDefault(x => x.Id == id) ?? throw new ArgumentNullException("article not found");
 
                 _db.Articles.Remove(article);
-
+                article.Comments.Clear();
                 _db.SaveChanges();
 
                 return Ok();

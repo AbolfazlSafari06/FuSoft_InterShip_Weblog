@@ -27,7 +27,7 @@ namespace Weblog.Controllers
                 var user = _db.Users.FirstOrDefault(x => x.Email == request.Email);
                 if (user is null)
                 {
-                    throw new Exception("user not found");
+                    throw new Exception("کاربری با این مشخصات یافت نشد");
                 }
 
                 user.Login(request.Password);

@@ -22,7 +22,7 @@
         {
             public const string BaseUser = "category";
             public class Get
-            { 
+            {
                 public const string Categoriy = "{id}";
                 public const string GetaPrents = "getparents/{name}";
                 public const string GetListOfCategories = "listofnameandid";
@@ -38,7 +38,7 @@
             {
                 public class Get
                 {
-                    public const string List = "articleView";
+                    public const string List = "View";
                 }
             }
         }
@@ -56,7 +56,7 @@
             public const string Base = "article";
 
             public class Get
-            { 
+            {
                 public const string Detail = "{id}";
             }
             public class Post
@@ -67,12 +67,28 @@
                 public const string UploadImage = "image";
             }
 
+            public class View
+            {
+                public class Get
+                {
+                    public const string List = "view";
+                }
+            }
         }
 
         public class Comments
         {
             public const string Base = "comments";
 
+            public class Post
+            {
+                public const string Create = "create";
+            }
+
+            public class Get
+            {
+                public const string View = "view";
+            }
         }
     }
 }

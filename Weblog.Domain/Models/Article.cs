@@ -19,7 +19,7 @@ namespace Weblog.Domain.Models
         [Required]
         public string Body { get; set; }
         [Required]
-        [MaxLength(500)]
+        [MaxLength(1000)]
         public string ShortDescription { get; set; }
         public string Image { get; set; }
         [Required]

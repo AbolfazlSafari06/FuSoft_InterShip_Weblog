@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Weblog.Domain;
 using Weblog.Domain.Models;
 using Weblog.Requests;
+using Weblog.Response;
 using Weblog.ViewModels;
 
 namespace Weblog.Controllers
@@ -25,6 +26,7 @@ namespace Weblog.Controllers
 
             try
             {
+
                 if (request is null)
                     throw new ArgumentNullException(nameof(request));
 
@@ -40,9 +42,35 @@ namespace Weblog.Controllers
 
                 var result = comments
                     .Skip((request.Page - 1) * request.PerPage).Take(request.PerPage)
-                    .Select(x => new CommentVm(x.Id,x.Body, x.IsPublished, x.ArticleId, x.UserId));
+                    .Select(x => new CommentVm(x.Id, x.Body, x.IsPublished, x.ArticleId, x.UserId, x.FullName));
 
                 return Ok(new { data = result, lenght = totalArticleCount });
+            }
+
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+        [HttpGet]
+        [Route(Routing.Comments.Get.View)]
+        public async Task<IActionResult> Index(CategoryVmForGetArticles request)
+        {
+            var comments = _db.Comments.AsNoTracking();
+
+            try
+            {
+                if (request is null)
+                    throw new ArgumentNullException(nameof(request));
+
+                var totalArticleCount = comments.Count();
+
+                var result = comments.Where(x => x.IsPublished == 1 && x.ArticleId == request.ArticleId)
+                    .Select(x => new CommentVm(x.Id, x.Body, x.IsPublished, x.ArticleId, x.UserId, x.FullName))
+                    .ToList();
+
+                return Ok(new { data = result, lenght = totalArticleCount });
+
             }
             catch (Exception e)
             {
@@ -50,12 +78,25 @@ namespace Weblog.Controllers
             }
         }
         [HttpPost]
-        [Route(Routing.Users.Post.Create)]
+        [Route(Routing.Comments.Post.Create)]
         public IActionResult Create([FromBody] CommentCreateRequest request)
         {
             try
             {
+                if (request is null)
+                {
+                    throw new Exception();
+                }
 
+                if (_db.Comments.Any(x => x.Body == request.Body))
+                {
+                    throw new Exception("همچین نظری وجود دارد");
+                }
+
+                var comment = new Comment(request.Body, 0, request.ArticleId, request.UserId, request.FullName);
+
+                _db.Comments.Add(comment);
+                _db.SaveChanges();
                 return Ok();
             }
             catch (Exception e)

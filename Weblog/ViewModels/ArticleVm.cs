@@ -4,7 +4,7 @@ namespace Weblog.ViewModels
 {
     public class ArticleVm
     {
-        public ArticleVm(int id, string title, string body, string shortDescription, string image, string createdAt, string updatedAt, string status, int? categoryId)
+        public ArticleVm(int id, string title, string body, string shortDescription, string image, string createdAt, string updatedAt, string status, int? categoryId, int userId)
         {
             Id = id;
             Title = title;
@@ -14,10 +14,12 @@ namespace Weblog.ViewModels
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
             Status = status;
-            CategoryId = categoryId; 
+            CategoryId = categoryId;
+            UserId = userId;
         }
 
         public int Id { get; set; }
+        public int UserId { get; set; }
         public string Title { get; set; }
         public int? CategoryId { get; set; }
         public string Body { get; set; }

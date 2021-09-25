@@ -12,7 +12,7 @@ namespace Weblog.Domain.Models
         [Key]
         public int Id { get; set; }
         [Required]
-        [MaxLength(100)]
+        [MaxLength(250)]
         public string Title { get; set; }
         public int Order { get; set; } 
         public int? ParentId { get; set; }

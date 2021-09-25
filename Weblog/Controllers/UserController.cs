@@ -80,9 +80,9 @@ namespace Weblog.Controllers
         {
             try
             {
-                if (_db.Users.Any(x => x.Email == request.Email))
+                if (_db.Users.Any(x => x.Email == request.Email && x.Name == request.Name))
                 {
-                    throw new Exception("ایمیل کاربر تکراری میباشد.");
+                    throw new Exception("مشخصات این  کاربر تکراری میباشد.");
                 }
                 var user = new User(request.Name, request.Email, request.Password);
                 this._db.Users.Add(user);

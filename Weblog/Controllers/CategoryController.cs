@@ -49,6 +49,30 @@ namespace Weblog.Controllers
                 return BadRequest(e);
             }
         }
+       
+        [HttpGet]
+        [Route(Routing.Category.View.Get.List)]
+        public IActionResult CategoryViewList(int perPage)
+        {
+            try
+            {
+                var categories = _db.Categories.AsNoTracking();
+
+                var totalArticleCount = categories.Count();
+
+                var result = categories.Take(perPage)
+                    .Select(x => new CategoryVm(x.Id, x.Title, x.Order, x.ParentId, x.Children.Count))
+                    .ToList();
+
+                //var result = returnjson(categories.FirstOrDefault(x => x.Id == 1005));
+
+                return Ok(new { data = result, lenght = totalArticleCount });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
         [HttpGet]
         [Route(Routing.Category.Get.GetListOfCategories)]
         public IActionResult GetListOfCategory()
@@ -79,7 +103,12 @@ namespace Weblog.Controllers
                 {
                     throw new Exception("category not found");
                 }
-                return Ok(category);
+
+                var result = new CategoryVm(category.Id, category.Title, category.Order, category.ParentId
+                    , category.Children.Count);
+
+
+                return Ok(result);
             }
             catch (Exception e)
             {
@@ -172,6 +201,9 @@ namespace Weblog.Controllers
                 {
                     return NotFound(nameof(category));
                 }
+
+                if (category.Children != null) category.Children.Clear();
+                if (category.Articles != null) category.Articles.Clear();
                 _db.Categories.Remove(category);
                 _db.SaveChanges();
                 return Ok("دسته بندی با موفقیت پاک شد");

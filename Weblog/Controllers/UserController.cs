@@ -127,7 +127,7 @@ namespace Weblog.Controllers
             }
         }
         [HttpDelete]
-        [Route(Routing.Users.Post.Dalete)]
+        [Route(Routing.Users.Post.Delete)]
         public IActionResult Delete(int id)
         {
             try

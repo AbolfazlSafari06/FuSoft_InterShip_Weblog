@@ -14,7 +14,7 @@
             {
                 public const string Create = "create";
                 public const string Update = "update";
-                public const string Dalete = "Delete/{id}";
+                public const string Delete = "Delete/{id}";
             }
 
         }
@@ -23,15 +23,15 @@
             public const string BaseUser = "category";
             public class Get
             {
-                public const string Categoriy = "{id}";
-                public const string GetaPrents = "getparents/{name}";
-                public const string GetListOfCategories = "listofnameandid";
+                public const string Category = "{id}";
+                public const string GetParents = "getparents/{name}";
+                public const string GetListOfCategories = "categorylist/{categoryName}";
             }
             public class Post
             {
                 public const string Create = "create";
                 public const string Update = "update";
-                public const string Dalete = "Delete/{id}";
+                public const string Delete = "Delete/{id}";
             }
 
             public class View

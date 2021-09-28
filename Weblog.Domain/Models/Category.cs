@@ -53,6 +53,10 @@ namespace Weblog.Domain.Models
         {
             if (this.Children is null) return;
             if (parentId is null) return;
+            foreach (var category in Children)
+            {
+                
+            }
             if (Children.Any(x => x.Id == parentId))
             {
                 throw new Exception("خطا در ایجاد دسته بندی");

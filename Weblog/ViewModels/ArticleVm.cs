@@ -1,11 +1,21 @@
 ﻿using System;
+using Weblog.Domain.Models;
 
 namespace Weblog.ViewModels
 {
     public class ArticleVm
     {
-        public ArticleVm(int id, string title, string body, string shortDescription, string image, string createdAt, string updatedAt, string status, int? categoryId, int userId)
+        public ArticleVm(int id, string title, string body, string shortDescription,
+            string image, DateTime createdAt, DateTime? updatedAt, bool status,
+            int? category, int user)
         {
+            //TODO :FIX IMAGE URL
+            //string imageUri = null;
+            //if (image != null)
+            //{
+            //    var uri = new System.Uri(image);
+            //    imageUri = uri.AbsoluteUri;
+            //}
             Id = id;
             Title = title;
             Body = body;
@@ -14,8 +24,8 @@ namespace Weblog.ViewModels
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
             Status = status;
-            CategoryId = categoryId;
-            UserId = userId;
+            CategoryId = category;
+            UserId = user;
         }
 
         public int Id { get; set; }
@@ -25,8 +35,8 @@ namespace Weblog.ViewModels
         public string Body { get; set; }
         public string ShortDescription { get; set; }
         public string Image { get; set; }
-        public string CreatedAt { get; set; }
-        public string UpdatedAt { get; set; }
-        public string Status { get; set; } 
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public bool Status { get; set; }
     }
 }

@@ -1,31 +1,35 @@
 ﻿using System;
+using Microsoft.AspNetCore.Http;
+using Weblog.Domain.Models;
+using Weblog.ViewModels;
 
 namespace Weblog.Requests
 {
     public class CreateArticleRequest
     {
-        public CreateArticleRequest(string title,string body, string shortDescription, string? image, string? status, int userId,int categoryId)
+        public CreateArticleRequest(string title,string body, string shortDescription, 
+            IFormFile image, bool status, string token, int category)
         {
             Title = title;
             Body = body;
             ShortDescription = shortDescription;
             Image = image;
-            CreatedAt = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
-            UpdatedAt = DateTime.Now.ToString("MM/dd/yyyy hh:mm tt");
             Status = status;
-            UserId = userId;
-            CategoryId = categoryId;
+            Token = token;
+            Category = category ;
         }
 
+        public CreateArticleRequest()
+        {
+            
+        }
         public string Title { get; set; }
         public string Body { get; set; }
-        public int CategoryId { get; set; }
-        public int UserId { get; set; }
+        public int Category  { get; set; }
+        public string Token { get; set; }
         public string ShortDescription { get; set; }
-        public string? Image { get; set; }
-        public string CreatedAt { get; set; }
-        public string UpdatedAt { get; set; }
-        public string? Status { get; set; }
+        public IFormFile? Image { get; set; }
+        public bool Status { get; set; }
 
 
 

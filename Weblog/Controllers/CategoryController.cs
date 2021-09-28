@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Weblog.Domain;
 using Weblog.Domain.Models;
 using Weblog.Requests;
@@ -25,22 +23,19 @@ namespace Weblog.Controllers
         {
             try
             {
-                var categories = _db.Categories.AsNoTracking();
-
-                var totalArticleCount = categories.Count();
-
 
                 if (request is null)
                 {
                     throw new Exception("request is null");
                 }
+                var categories = _db.Categories.AsNoTracking();
 
+                var totalArticleCount = categories.Count();
+                
                 var result = categories
                     .Skip((request.Page - 1) * request.PerPage).Take(request.PerPage)
-                    .Select(x => new CategoryVm(x.Id, x.Title, x.Order, x.ParentId, x.Children.Count))
-                    .ToList();
-
-                //var result = returnjson(categories.FirstOrDefault(x => x.Id == 1005));
+                        .Select(x => new CategoryVm(x.Id, x.Title, x.Order, x.ParentId))
+                        .ToList(); 
 
                 return Ok(new { data = result, lenght = totalArticleCount });
             }
@@ -61,7 +56,7 @@ namespace Weblog.Controllers
                 var totalArticleCount = categories.Count();
 
                 var result = categories.Take(perPage)
-                    .Select(x => new CategoryVm(x.Id, x.Title, x.Order, x.ParentId, x.Children.Count))
+                    .Select(x => new CategoryVm(x.Id, x.Title, x.Order, x.ParentId))
                     .ToList();
 
                 //var result = returnjson(categories.FirstOrDefault(x => x.Id == 1005));
@@ -73,25 +68,25 @@ namespace Weblog.Controllers
                 return BadRequest(e);
             }
         }
-        [HttpGet]
-        [Route(Routing.Category.Get.GetListOfCategories)]
-        public IActionResult GetListOfCategory()
-        {
-            try
-            {
-                var categories = _db.Categories
-                    .Where(c => c.ParentId == null)
-                    .OrderBy(c => c.Order)
-                    .Select(x => new { x.Id, x.Title })
-                    .ToList();
+        //[HttpGet]
+        //[Route(Routing.Category.Get.GetListOfCategories)]
+        //public IActionResult GetListOfCategory()
+        //{
+        //    try
+        //    {
+        //        var categories = _db.Categories
+        //            .Where(c => c.ParentId == null)
+        //            .OrderBy(c => c.Order)
+        //            .Select(x=>new CategoryVm(x.Id,x.Title,x.Order,x.ParentId))
+        //            .ToList();
 
-                return Ok(categories);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e);
-            }
-        }
+        //        return Ok(categories);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e);
+        //    }
+        //}
         [HttpGet]
         [Route(Routing.Category.Get.Categoriy)]
         public IActionResult GetCategory(int id)
@@ -101,12 +96,10 @@ namespace Weblog.Controllers
                 var category = _db.Categories.FirstOrDefault(x => x.Id == id);
                 if (category is null)
                 {
-                    throw new Exception("category not found");
+                    throw new Exception("دسته بندی پیدا نشد");
                 }
 
-                var result = new CategoryVm(category.Id, category.Title, category.Order, category.ParentId
-                    , category.Children.Count);
-
+                var result = new CategoryVm(category.Id, category.Title, category.Order, category.ParentId); 
 
                 return Ok(result);
             }
@@ -117,14 +110,14 @@ namespace Weblog.Controllers
         }
 
         [Route(Routing.Category.Get.Categoriy)]
-        public IActionResult Detail(string id)
+        public IActionResult Detail(int id)
         {
-            var user = this._db.Users.Find(Int32.Parse(id));
-            if (user == null)
+            var category = this._db.Categories.Find(id);
+            if (category == null)
             {
                 return BadRequest(new Exception("user Not Found"));
             }
-            return Ok(user);
+            return Ok(category);
         }
         [HttpPost]
         [Route(Routing.Category.Post.Create)]
@@ -141,9 +134,10 @@ namespace Weblog.Controllers
                 var category = new Category(request.Title, request.order, request.ParentId);
 
                 categories.Add(category);
+
                 _db.SaveChanges();
 
-                return Ok();
+                return Ok(category);
             }
             catch (Exception e)
             {
@@ -163,12 +157,13 @@ namespace Weblog.Controllers
                     throw new Exception("name is null");
                 }
 
-                var selected = categories.Where(c => c.Title.Contains(name.Trim()));
+                var selected = categories.Where(c => c.Title.Contains(name.Trim()))
+                    .Select(x=>new CategoryVm(x.Id,x.Title,x.Order,x.ParentId));
 
-                if (selected == null)
-                    throw new Exception("noResult");
+                if (selected is null)
+                    throw new Exception("دسته بندی  ای پیدا نشد");
 
-                return Ok(selected.Select(x => new { x.Title, x.Id }));
+                return Ok(selected);
             }
             catch (Exception e)
             {
@@ -180,14 +175,21 @@ namespace Weblog.Controllers
         [Route(Routing.Category.Post.Update)]
         public IActionResult Update([FromBody] UpdateCategoryRequest request)
         {
-            var category = _db.Categories.FirstOrDefault(x => x.Id == request.Id);
-            if (category == null)
+            try
             {
-                return NotFound("user Not Found");
+                var category = _db.Categories.FirstOrDefault(x => x.Id == request.Id);
+                if (category == null)
+                {
+                    return NotFound("user Not Found");
+                }
+                category.UpdateByAdmin(request.Title, request.Order, request.ParentId);
+                _db.SaveChanges();
+                return Ok(new CategoryVm(category.Id,category.Title,category.Order,category.ParentId));
             }
-            category.UpdateByAdmin(request.Title, request.Order, request.ParentId);
-            _db.SaveChanges();
-            return Ok();
+            catch (Exception e)
+            {
+                return  BadRequest(e);
+            }
         }
 
         [HttpDelete]
@@ -202,16 +204,14 @@ namespace Weblog.Controllers
                     return NotFound(nameof(category));
                 }
 
-                if (category.Children != null) category.Children.Clear();
-                if (category.Articles != null) category.Articles.Clear();
+                if (category.Children.Count == 0|| category.Articles.Count == 0) throw new Exception("حذف دسته مورد نظر امکان پذیر نمیباشد زیرا دارای زیر دسته و مقاله میباشد");
                 _db.Categories.Remove(category);
                 _db.SaveChanges();
                 return Ok("دسته بندی با موفقیت پاک شد");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                return BadRequest(e);
             }
         }
     }

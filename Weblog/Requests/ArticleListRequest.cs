@@ -2,22 +2,23 @@
 {
     public class ArticleListRequest
     {
-        public ArticleListRequest(string query, string sort, int perPage, int page, int? categoryId, int userId)
+        public ArticleListRequest(string query, string sort, int perPage, int page,
+            int? categoryId, string token)
         {
             Query = query;
             Sort = sort;
             Page = page;
             CategoryId = categoryId;
-            UserId = userId;
+            Token = token;
             PerPage = perPage;
         }
 
         public ArticleListRequest()
         {
-           
+             
         }
 
-        public int UserId { get; set; }
+        public string Token { get; set; }
         public int? CategoryId { get; set; }
         public string Query { get; set; }
         public string Sort { get; set; }

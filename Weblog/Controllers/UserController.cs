@@ -108,6 +108,8 @@ namespace Weblog.Controllers
             _db.SaveChanges();
             return Ok(new UserVm(user.Id, user.Name, user.Email, user.IsAdmin));
         }
+
+
         [HttpPost]
         public IActionResult Store([FromBody] CreateUserRequest request)
         {

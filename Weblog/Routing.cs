@@ -38,7 +38,7 @@
             {
                 public class Get
                 {
-                    public const string List = "View";
+                    public const string List = "View/{perPage}";
                 }
             }
         }
@@ -64,7 +64,7 @@
                 public const string Create = "create";
                 public const string Edit = "edit";
                 public const string Delete = "delete/{id}";
-                public const string UploadImage = "image";
+                public const string UploadImage = "images/{name}";
             }
 
             public class View

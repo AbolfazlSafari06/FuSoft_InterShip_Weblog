@@ -27,7 +27,7 @@ namespace Weblog.Services
                 return address;
             }
 
-            return "";
+            return null;
 
         }
 

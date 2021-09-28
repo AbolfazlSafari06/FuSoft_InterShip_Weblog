@@ -5,13 +5,12 @@ namespace Weblog.ViewModels
 {
     public sealed class CategoryVm
     {
-        public CategoryVm(int id, string title, int order, int? parentId, int children)
+        public CategoryVm(int id,string title, int order, int? parentId)
         {
             Id = id;
             Title = title;
             Order = order;
-            ParentId = parentId;
-            Children = children;
+            ParentId = parentId; 
         }
 
         public CategoryVm()
@@ -22,8 +21,6 @@ namespace Weblog.ViewModels
         public int Id { get; set; } 
         public string Title { get; set; }
         public int Order { get; set; }
-        public int? ParentId { get; set; } 
-        public int Children { get; set; } 
-
+        public int? ParentId { get; set; }  
     }
 }

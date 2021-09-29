@@ -123,7 +123,7 @@ namespace Weblog.Controllers
                 if (request is null)
                     throw new Exception("request is null");
                 if (categories.Any(x => x.Title == request.Title))
-                    throw new Exception("this category is exist");
+                    throw new Exception("دسته بندی دیگری با این عنوان وجود دارد");
 
                 var category = new Category(request.Title, request.Order, request.ParentId);
 

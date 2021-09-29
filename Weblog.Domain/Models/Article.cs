@@ -49,8 +49,8 @@ namespace Weblog.Domain.Models
             {
                 throw new Exception("عنوان مقاله را وارد کنید");
             }
-
-            if (title.Length > 200)
+            
+            if (title.Length > 80)
             {
                 throw new Exception("عنوان مقاله طولانی می باشد");
             }
@@ -83,8 +83,9 @@ namespace Weblog.Domain.Models
             CategoryId = category.Id; 
         } 
 
-        public void Edit(string title, string body, string shortDescription, string image,
-            DateTime updatedAt, bool status, int? categoryId)
+
+
+        public void Edit(string title, string body, string shortDescription, string image, bool status, int? categoryId)
         {
             if (string.IsNullOrEmpty(title))
             {

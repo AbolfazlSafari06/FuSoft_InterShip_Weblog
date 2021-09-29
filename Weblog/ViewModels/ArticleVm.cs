@@ -7,7 +7,7 @@ namespace Weblog.ViewModels
     {
         public ArticleVm(int id, string title, string body, string shortDescription,
             string image, DateTime createdAt, DateTime? updatedAt, bool status,
-            int? category, int user)
+            int? categoryId, int userId)
         {
             //TODO :FIX IMAGE URL
             //string imageUri = null;
@@ -24,8 +24,8 @@ namespace Weblog.ViewModels
             CreatedAt = createdAt;
             UpdatedAt = updatedAt;
             Status = status;
-            CategoryId = category;
-            UserId = user;
+            CategoryId = categoryId;
+            UserId = userId;
         }
 
         public int Id { get; set; }

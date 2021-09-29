@@ -10,6 +10,7 @@ using Weblog.Domain;
 using System.Linq;
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 
 namespace Weblog.Controllers
@@ -33,14 +34,20 @@ namespace Weblog.Controllers
         public async Task<ActionResult> Index(ArticleListRequest request)
         {
 
+            var users = _db.Users.AsNoTracking();
+           
             try
             {
+
+                var user = users.FirstOrDefault(x => x.Token == request.Token);
+
                 if (request is null)
                 {
                     throw new Exception("request is null");
                 }
 
                 var articleList = _db.Articles.Where(x => x.User.Token == request.Token);
+               
                 if (request.Query != null)
                 {
                     articleList = articleList.Where(x => x.Title.Contains(request.Query.Trim()));
@@ -123,6 +130,11 @@ namespace Weblog.Controllers
                     return Forbid("شما دسترسی لازم برای اضافه کردن مقاله را ندارید");
                 }
 
+                if (request.Category == null)
+                {
+                    return Forbid("لطفا دسته بندی را انتخاب کنید");
+
+                }
                 if (!user.IsAdmin)
                 {
                     return Forbid("شما دسترسی لازم برای اضافه کردن مقاله را ندارید");
@@ -209,7 +221,7 @@ namespace Weblog.Controllers
         // POST: ArticleController/Edit/5
         [HttpPost]
         [Route(Routing.Article.Post.Edit)]
-        public async Task<ActionResult> Edit([FromBody] ArticleVm request)
+        public async Task<ActionResult> Edit([FromForm] ArticleRequestEdit request)
         {
             var articles = _db.Articles;
 
@@ -217,8 +229,7 @@ namespace Weblog.Controllers
             {
                 var article = articles.FirstOrDefault(x => x.Id == request.Id) ?? throw new ArgumentNullException("article not found");
 
-                article.Edit(request.Title, request.Body, request.ShortDescription, request.Image,
-                    DateTime.Now, request.Status, request.CategoryId);
+                article.Edit(request.Title, request.Body, request.ShortDescription, request.Image.ToString(), request.Status, request.CategoryId);
 
                 await _db.SaveChangesAsync();
 
